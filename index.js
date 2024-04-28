@@ -7,9 +7,9 @@ class GameState {
 
     play(machine) {
         let nx;
-        logger.info('Hello, world!');
-        logger.debug('Hello, world!');
-        logger.trace('Hello, world!');
+        logger.info('Hello, info world!');
+        logger.debug('Hello, debug world!');
+        logger.trace('Hello, trace world!');
 
         do {
             machine.execute(this);
@@ -22,11 +22,14 @@ class GameState {
     register(cb) {
         this.callback = cb;
     }
+
 }
-const g = new GameState();
 let machine = createMachine();
+const g = new GameState();
 
 machine.init(g);
+
 g.play(machine);
 
 
+                

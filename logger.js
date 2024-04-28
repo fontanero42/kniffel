@@ -10,15 +10,14 @@ const fileTransport = pino.transport({
 
 export const logger = pino({
   base: undefined,
-  level: process.env.PINO_LOG_LEVEL || 'info',
+  level: process.env.PINO_LOG_LEVEL || 'trace',
   timestamp: pino.stdTimeFunctions.isoTime,
-  /**
   transport: {
     target:'pino-pretty',
       options: {
         colorize:true 
       }
-  },*/
+  },                  
 },
 fileTransport
 );

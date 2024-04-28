@@ -1,16 +1,16 @@
 //import { rulezInit } from "./Rulez.js";
 import { moveFactory } from "./movee.js";
 import { logger } from "./logger.js";
+import { createDice } from "./dice.js";
 //import fs from  "fs"
 //const VERBOSE = true;
-
 const transitions = [
   'start~dice~eqT',
   'dice~score~eqT',
   'score~chose~eqT',
-  'chose~dice~eqT', 'chose~note~eqT',
+  'chose~dice~eqF', 'chose~note~eqT',
   'note~yield~eqT',
-  'yield~dice~eqT', 'yield~end~eqT',
+  'yield~dice~eqF', 'yield~end~eqT',
 ];
 
 
@@ -44,20 +44,18 @@ const stateGraph = buildGraph(transitions);
 export function createMachine() {
   let machine = Object.create(null);
   machine.init = function (gstate) {
+    this.gstate=gstate;
     this.state = 'start'
     this.graph = stateGraph;
-    this.fullCard = false
+    gstate.dice = createDice();
+    this.fullCard = false;
     this.rulezViolation = false;
     this.ruleName = '';
-    this.log = new Map();
-    this.opt = new Map();
-    this.cnt = new Map();
-//   gstate.deck.register(machine.deckCb);
+    //   gstate.deck.register(machine.deckCb);
     gstate.register(machine.fullCardCb);
-//    rulezInit(machine.rulezVl);
+    //    rulezInit(machine.rulezVl);
     this.move = moveFactory(this.state, this.round);
   }
-
   machine.execute = function (gstate) {
     logger.debug('exec');
     this.rc = this.move.execute(gstate);
@@ -103,10 +101,16 @@ export function createMachine() {
   machine.eqT = function () {
     return true;
   }
+  machine.eqF = function () {
+    return false;
+  }
+
   machine.predicate = function (name) {
     switch (name) {
       case 'eqT':
         return this.eqT();
+      case 'eqF':
+        return this.eqF();
       case 'isF':
         return this.isE();
       case 'rV':
