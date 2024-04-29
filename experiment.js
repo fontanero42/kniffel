@@ -11,6 +11,9 @@ export function createExperiment() {
     experiment.out = function () {
         this.log.debug("go int");
     }
+get    essential(){
+        return{val:this.valor,col: this.color};
+    }
     return experiment;
 }
 
@@ -25,3 +28,5 @@ ex2.init('red', 0);
 ex2.out();
 ex.valor = 10;
 console.log(ex.valor);
+logger.debug(ex,'try');
+logger.debug(ex.essential,'again'),

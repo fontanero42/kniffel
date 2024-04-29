@@ -51,13 +51,17 @@ export function createMachine() {
     this.fullCard = false;
     this.rulezViolation = false;
     this.ruleName = '';
+    this.log = logger.child({ test: 'machine', state: this.getContext });
     //   gstate.deck.register(machine.deckCb);
     gstate.register(machine.fullCardCb);
     //    rulezInit(machine.rulezVl);
     this.move = moveFactory(this.state, this.round);
   }
+  machine.getContext = function (){
+    return {state:this.state  };
+  }
   machine.execute = function (gstate) {
-    logger.debug('exec');
+    this.log.debug('exec');
     this.rc = this.move.execute(gstate);
   }
 

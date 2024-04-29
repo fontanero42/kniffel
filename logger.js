@@ -12,6 +12,14 @@ export const logger = pino({
   base: undefined,
   level: process.env.PINO_LOG_LEVEL || 'trace',
   timestamp: pino.stdTimeFunctions.isoTime,
+  /*serializers:{
+    experiment  (e){
+      return {
+        valor: e.valor,
+        color: e.color,
+      }
+    }
+  },*/
   transport: {
     target:'pino-pretty',
       options: {
