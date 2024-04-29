@@ -1,4 +1,12 @@
 import { logger } from "./logger.js";
+console.log(logger);
+/*logger.formatters ={
+    log (obj) {
+      obj.foo='bar';
+      delete  obj.log;
+      return (obj)
+    }
+  };*/
 
 export function createExperiment() {
     let experiment = Object.create(null);
@@ -28,5 +36,3 @@ ex2.init('red', 0);
 ex2.out();
 ex.valor = 10;
 console.log(ex.valor);
-logger.debug(ex,'try');
-logger.debug(ex.essential,'again'),
