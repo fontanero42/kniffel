@@ -1,6 +1,6 @@
 //const pino = require('pino');
 import  pino from 'pino'
-import             pinoPretty from 'pino-pretty'
+import  pinoPretty from 'pino-pretty'
 
 const fileTransport = pino.transport({
   target: 'pino/file',
