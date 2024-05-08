@@ -43,15 +43,15 @@ const stateGraph = buildGraph(transitions);
 
 export function createMachine() {
   let machine = Object.create(null);
-  machine.init = function (gstate) {
+  function init (gstate) {
     this.gstate=gstate;
     this.state = 'start'
     this.graph = stateGraph;
-    gstate.dice = createDice();
+    this.dice = createDice();
     this.fullCard = false;
     this.rulezViolation = false;
     this.ruleName = '';
-    this.log = logger.child({ test: 'machine', state: this.getContext });
+    this.log = logger.child({ test: 'machine'});
     //   gstate.deck.register(machine.deckCb);
     gstate.register(machine.fullCardCb);
     //    rulezInit(machine.rulezVl);
@@ -60,14 +60,14 @@ export function createMachine() {
   machine.getContext = function (){
     return {state:this.state  };
   }
-  machine.execute = function (gstate) {
+  function execute (gstate) {
     this.log.debug('exec');
-    this.rc = this.move.execute(gstate);
+    this.rc = this.move.execute(gstate,this.dice);
   }
 
-  machine.next = function (gstate) {
+  const next = function (gstate) {
     if (this.state == 'end') {
-      this.stop();
+      stop();
       return null;
     }
     this.round = this.move.round;
@@ -76,9 +76,9 @@ export function createMachine() {
     // select newstate
 
     for (const item of newStates) {
-      if (this.predicate(item.cond)) {
+      if (predicate(item.cond)) {
         this.state = item.to;
-        return this.move = moveFactory(item.to, this.round, gstate, this.options, this.choice, machine.tableCb, machine.optionsCb, machine.snapshot);
+        return this.move = moveFactory(item.to, this.round, gstate, this.dice);
       }
     }
   }
@@ -96,38 +96,38 @@ export function createMachine() {
     logger.debug("rulez Violation", name);
   }
 
-  machine.isF = function () {
+  function isF() {
     return (this.fullCard);
   }
-  machine.rV = function () {
+  function rV() {
     return (this.rulezViolation);
   }
-  machine.eqT = function () {
+  function eqT() {
     return true;
   }
-  machine.eqF = function () {
+  function eqF() {
     return false;
   }
 
-  machine.predicate = function (name) {
+  const predicate = function (name) {
     switch (name) {
       case 'eqT':
-        return this.eqT();
+        return eqT();
       case 'eqF':
-        return this.eqF();
+        return eqF();
       case 'isF':
-        return this.isE();
+        return isF();
       case 'rV':
-        return this.rV();
+        return rV();
       default:
         logger.debug("predicate not found!");
     }
   }
-  machine.stop = function () {
+  const stop = function () {
     logger.debug("shutdown");
   }
 
-  return machine;
+  return {machine, init, execute, next};
 }
 
 

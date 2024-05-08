@@ -1,18 +1,18 @@
+import { createScorecard } from "./dice.js";
 import { logger } from "./logger.js";
+import { score } from "./sutils.js";
 
-const MAX_POINTS=6;
-
-export function moveFactory(type, round, gstate) {
+export function moveFactory(type, round, gstate, dice) {
   let move;
   switch (type) {
     case 'start':
       move = new NoOp(gstate);
       break;
     case 'dice':
-     move = new Dice(round, gstate);
+     move = new Dice(round, gstate, dice);
       break;
     case 'score':
-      move = new Score(round, gstate);
+      move = new Score(round, gstate, dice);
       break;
     case 'chose':
       move = new Chose(round, gstate);
@@ -65,37 +65,37 @@ export class NoOp extends Move {
 
 
 export class Dice extends Move {
-  constructor(round, gstate) {
+  constructor(round, gstate, dice) {
     super(round);
     super.message = "dice";
     this.gstate = gstate;
+    this.dice = dice;
   }
 
   execute() {
     super.log();
-    this.roll(this.gstate.dice);
-    logger.trace({points: `${this.gstate.dice}`, generation: `${this.gstate.dice.generation}`});
+    this.dice.roll();
+//    logger.trace({points: `${this.gstate.dice}`, generation: `${this.gstate.dice.generation}`});
     return;
   }
 
-  roll(dice) {
-    let dnew =dice.map((item) => Math.floor(Math.random() * MAX_POINTS));
-    this.gstate.dice=dnew;              
-    return;              
-  }
 
 }
 
 
 export class Score extends Move {
-  constructor(round, gstate) {
+  constructor(round, gstate, dice) {
     super(round);
     super.message = "score";
     this.gstate = gstate;
+    this.dice = dice;
   }
 
   execute() {
     super.log();
+    let card=createScorecard();
+    card.lower={threeS:"",fourS:"",kniffel:""};
+    score(this.dice,card);
     return;
   }
 
