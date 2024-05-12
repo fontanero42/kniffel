@@ -1,0 +1,2 @@
+        c_p("CO2",z,r) = (R_univ / M("CO2")) * (3.4923 + (-0.9306 - 3.4923)*SQR(Gamma("CO2",z,r))*(1+(Gamma("CO2",z,r)-1)*(ñ6.0861+54.1586*Gamma("CO2",z,r) - 97.5157*SQR(Gamma("CO2",z,r))+70.9687*Gamma("CO2",z,r)^3)));
+        c_p("CO2",        
