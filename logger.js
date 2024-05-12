@@ -7,11 +7,16 @@ const fileTransport = pino.transport({
   options: { destination: `./app.log` },
 });
 
+/*const prettifyQuery = (value) =>{
+  return;
+}*/
+
 
 export const logger = pino({
   base: undefined,
   level: process.env.PINO_LOG_LEVEL || 'trace',
   timestamp: pino.stdTimeFunctions.isoTime,
+  redact: ['password','email'],
   formatters: {
     log (obj) {
       obj.foo='bar';
@@ -22,7 +27,10 @@ export const logger = pino({
   transport: {
     target:'pino-pretty',
       options: {
-        colorize:true 
+        colorize:true, 
+      /*  customPrettifiers:{
+          test:prettifyQuery
+        }*/
       }
   },                  
 },
