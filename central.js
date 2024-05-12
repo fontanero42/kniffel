@@ -1,7 +1,7 @@
 //import { rulezInit } from "./Rulez.js";
 import { moveFactory } from "./movee.js";
 import { logger } from "./logger.js";
-import { createDice } from "./dice.js";
+import { createDice, createScorecard } from "./dice.js";
 //import fs from  "fs"
 //const VERBOSE = true;
 const transitions = [
@@ -10,7 +10,7 @@ const transitions = [
   'score~chose~eqT',
   'chose~dice~eqF', 'chose~note~eqT',
   'note~yield~eqT',
-  'yield~dice~eqF', 'yield~end~eqT',
+  'yield~end~isF','yield~dice~eqT' 
 ];
 
 
@@ -43,19 +43,23 @@ const stateGraph = buildGraph(transitions);
 
 export function createMachine() {
   let machine = Object.create(null);
+  let fullCard;
   function init (gstate) {
     this.gstate=gstate;
     this.state = 'start'
     this.graph = stateGraph;
-    this.dice = createDice();
+    gstate.dice = createDice();
+    gstate.card = createScorecard();
+    gstate.options = new Array();
+    gstate.choice = null;
     this.fullCard = false;
     this.rulezViolation = false;
     this.ruleName = '';
     this.log = logger.child({ test: 'machine'});
     //   gstate.deck.register(machine.deckCb);
-    gstate.register(machine.fullCardCb);
+    gstate.card.register(fullCardCb.bind(this)    );
     //    rulezInit(machine.rulezVl);
-    this.move = moveFactory(this.state, this.round);
+    this.move = moveFactory(this.state, this.round, this.gstate);
   }
   machine.getContext = function (){
     return {state:this.state  };
@@ -76,14 +80,14 @@ export function createMachine() {
     // select newstate
 
     for (const item of newStates) {
-      if (predicate(item.cond)) {
+      if (predicate.call(this,item.cond)) {
         this.state = item.to;
-        return this.move = moveFactory(item.to, this.round, gstate, this.dice);
+        return this.move = moveFactory(item.to, this.round, gstate);
       }
     }
   }
-  machine.fullCardCb = function () {
-    machine.fullCard = true;
+  function fullCardCb () {
+    this.fullCard = true;
     logger.debug("heureka");
   }
   machine.snapshot = function (round, table) {
@@ -116,7 +120,7 @@ export function createMachine() {
       case 'eqF':
         return eqF();
       case 'isF':
-        return isF();
+        return isF.call(this);
       case 'rV':
         return rV();
       default:
@@ -127,7 +131,7 @@ export function createMachine() {
     logger.debug("shutdown");
   }
 
-  return {machine, init, execute, next};
+  return {machine, init, execute, next, fullCardCb,fullCard};
 }
 
 

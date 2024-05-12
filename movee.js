@@ -1,18 +1,18 @@
-import { createScorecard } from "./dice.js";
 import { logger } from "./logger.js";
 import { score } from "./sutils.js";
+import { chose, note } from "./cutils.js";
 
-export function moveFactory(type, round, gstate, dice) {
+export function moveFactory(type, round, gstate) {
   let move;
   switch (type) {
     case 'start':
       move = new NoOp(gstate);
       break;
     case 'dice':
-     move = new Dice(round, gstate, dice);
+     move = new Dice(round, gstate);
       break;
     case 'score':
-      move = new Score(round, gstate, dice);
+      move = new Score(round, gstate);
       break;
     case 'chose':
       move = new Chose(round, gstate);
@@ -65,11 +65,11 @@ export class NoOp extends Move {
 
 
 export class Dice extends Move {
-  constructor(round, gstate, dice) {
+  constructor(round, gstate) {
     super(round);
     super.message = "dice";
     this.gstate = gstate;
-    this.dice = dice;
+    this.dice = gstate.dice;
   }
 
   execute() {
@@ -84,18 +84,18 @@ export class Dice extends Move {
 
 
 export class Score extends Move {
-  constructor(round, gstate, dice) {
+  constructor(round, gstate) {
     super(round);
     super.message = "score";
     this.gstate = gstate;
-    this.dice = dice;
+    this.dice = gstate.dice;
+    this.card = gstate.card;
+    this.options = gstate.options;
   }
 
   execute() {
     super.log();
-    let card=createScorecard();
-    card.lower={threeS:"",fourS:"",kniffel:""};
-    score(this.dice,card);
+    score(this.dice,this.card,this.options);
     return;
   }
 
@@ -107,10 +107,15 @@ export class Chose extends Move {
     super(round);
     super.message = "chose";
     this.gstate = gstate;
+    this.dice = gstate.dice;
+    this.card = gstate.card;
+    this.options = gstate.options;
+    this.choice = gstate.choice;
   }
 
   execute() {
     super.log();
+    this.gstate.choice=chose(this.dice, this.card, this.options);
     return;
   }
 
@@ -122,10 +127,15 @@ export class Note extends Move {
     super(round);
     super.message = "note";
     this.gstate = gstate;
+    this.dice = gstate.dice;
+    this.options = gstate.options;
+    this.choice = gstate.choice;
+    this.card = gstate.card;
   }
 
   execute() {
     super.log();
+    note(this.dice, this.card, this.options[this.choice]);
     return;
   }
 
