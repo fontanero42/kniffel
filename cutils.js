@@ -1,7 +1,8 @@
-import { logger } from "./logger.js";
+  import { logger } from "./logger.js";
 export function chose(dice,card,options) {
   logger.debug(options, "feeling lucky");
   let choice =  Math.floor(Math.random() * options.length);
+  choice.selected(dice);    
   return choice;
 }
 
@@ -14,7 +15,7 @@ export function note(dice,card,figure) {
       if (! card.lower.chance)
         card.lower.chance=figure.valor;
       else
-        strike('chance');        
+        strike(card,'chance');        
       card.scribe();
       break;
     case 'threesome':   
@@ -22,7 +23,7 @@ export function note(dice,card,figure) {
       if (! card.lower.threesome)
         card.lower.threesome=figure.valor;
       else
-        strike('threesome');        
+        strike(card,'threesome');        
       break;
     case 'foursome':
       //foursome
@@ -47,5 +48,11 @@ function strike(card,name){
     if(fig !== name && !card.lower[fig])
       alternate.push(fig);
   }
+  victim(card,alternate);
   return;
+}
+
+
+function victim(card, alternate){
+  card.strike( alternate[0]);
 }

@@ -1,30 +1,31 @@
 import { logger } from "./logger.js";
 import { score } from "./sutils.js";
 import { chose, note } from "./cutils.js";
+import { createDice } from "./dice.js";
 
-export function moveFactory(type, round, gstate) {
+export function moveFactory(type, gstate) {
   let move;
   switch (type) {
     case 'start':
       move = new NoOp(gstate);
       break;
     case 'dice':
-     move = new Dice(round, gstate);
+     move = new Dice(gstate);
       break;
     case 'score':
-      move = new Score(round, gstate);
+      move = new Score(gstate);
       break;
     case 'chose':
-      move = new Chose(round, gstate);
+      move = new Chose(gstate);
       break;
     case 'note':
-      move = new Note(round, gstate);
+      move = new Note(gstate);
       break;
     case 'yield':
-      move = new Yield(round, gstate);
+      move = new Yield(gstate);
       break;
     case 'end':
-      move = new End(round, gstate, 'finis');
+      move = new End(gstate, 'finis');
       break;
 
     default:
@@ -53,7 +54,7 @@ export class Move {
 
 export class NoOp extends Move {
     constructor(gstate) {
-    super(0);
+    super(gstate.round);
     super.message = "start";
     this.gstate = gstate;
   }
@@ -65,8 +66,8 @@ export class NoOp extends Move {
 
 
 export class Dice extends Move {
-  constructor(round, gstate) {
-    super(round);
+  constructor(gstate) {
+    super(gstate.round);
     super.message = "dice";
     this.gstate = gstate;
     this.dice = gstate.dice;
@@ -74,8 +75,13 @@ export class Dice extends Move {
 
   execute() {
     super.log();
-    this.dice.roll();
+    if (this.dice.generation=="init"){
+      this.dice.roll();
 //    logger.trace({points: `${this.gstate.dice}`, generation: `${this.gstate.dice.generation}`});
+      this.dice.advance();  
+     } else{
+      this.dice.reroll(); 
+    }
     return;
   }
 
@@ -84,8 +90,8 @@ export class Dice extends Move {
 
 
 export class Score extends Move {
-  constructor(round, gstate) {
-    super(round);
+  constructor(gstate) {
+    super(gstate.round);
     super.message = "score";
     this.gstate = gstate;
     this.dice = gstate.dice;
@@ -103,8 +109,8 @@ export class Score extends Move {
 
 
 export class Chose extends Move {
-  constructor(round, gstate) {
-    super(round);
+  constructor(gstate) {
+    super(gstate.round);
     super.message = "chose";
     this.gstate = gstate;
     this.dice = gstate.dice;
@@ -116,15 +122,15 @@ export class Chose extends Move {
   execute() {
     super.log();
     this.gstate.choice=chose(this.dice, this.card, this.options);
-    return;
+    return; 
   }
 
 }
 
 
 export class Note extends Move {
-  constructor(round, gstate) {
-    super(round);
+  constructor(gstate) {
+    super(gstate.round);
     super.message = "note";
     this.gstate = gstate;
     this.dice = gstate.dice;
@@ -142,22 +148,23 @@ export class Note extends Move {
 }
 
 export class Yield extends Move {
-  constructor(round, gstate) {
-    super(round);
+  constructor(gstate) {
+    super(gstate.round);
     super.message ="yield";
     this.gstate = gstate;
   }
 
   execute() {
     super.log();
+    this.gstate.round++;
     return;
   }
 
 }
 
 export class End extends Move {
-  constructor(round, gstate, reason) {
-    super(round);
+  constructor(gstate, reason) {
+    super(gstate.round);
     super.message = "end" + " " + reason;
     this.gstate = gstate;
   }

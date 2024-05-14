@@ -3,6 +3,7 @@ import { logger } from "./logger.js";
 
 class GameState {
     constructor() {
+    this.round=0;
     }
 
     play(machine) {
