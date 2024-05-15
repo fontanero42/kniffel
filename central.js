@@ -8,7 +8,7 @@ const transitions = [
   'start~dice~eqT',
   'dice~score~eqT',
   'score~chose~eqT',
-    'chose~note~x3T','chose~dice~eqT', 
+  'chose~note~x3T','chose~dice~eqT', 
   'note~yield~eqT',
   'yield~end~isF','yield~dice~eqT' 
 ];
@@ -57,7 +57,7 @@ export function createMachine() {
     this.lastTry = false;
     this.rulezViolation = false;
     this.ruleName = '';
-    this.log = logger.child({ test: 'machine'});
+//    this.log = logger.child({ test: 'machine'});
     gstate.card.register(fullCardCb.bind(this));
     gstate.dice.register(xtrTryCb.bind(this));
     //    rulezInit(machine.rulezVl);
@@ -67,7 +67,7 @@ export function createMachine() {
     return {state:this.state  };
   }
   function execute (gstate) {
-    this.log.debug('exec');
+    logger.debug('exec');
     this.rc = this.move.execute(gstate,this.dice);
   }
 
@@ -93,7 +93,7 @@ export function createMachine() {
     logger.debug("heureka");
   }
   function xtrTryCb () {
-    this.lastTry= true;
+    this.lastTry= ! this.lastTry;
     logger.debug("enough is enough");
   }
   machine.snapshot = function (round, table) {

@@ -13,7 +13,7 @@ function prettifyQuery () {
 
 export const logger = pino({
   base: undefined,
-  level: process.env.PINO_LOG_LEVEL || 'trace',
+  level: process.env.PINO_LOG_LEVEL || 'debug',
   timestamp: pino.stdTimeFunctions.isoTime,
 /*  formatters: {
     log (obj) {

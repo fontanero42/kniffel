@@ -2,7 +2,6 @@
 export function chose(dice,card,options) {
   logger.debug(options, "feeling lucky");
   let choice =  Math.floor(Math.random() * options.length);
-  choice.selected(dice);    
   return choice;
 }
 
@@ -30,10 +29,14 @@ export function note(dice,card,figure) {
       if (! card.lower.foursome)
         card.lower.foursome=figure.valor;
       else
-        strike('foursome');        
+        strike(card,'foursome');        
       break;
-    case 5:
+    case 'kniffel':
       //kniffel
+      if (! card.lower.kniffel)
+        card.lower.kniffel=figure.valor;
+      else
+        strike(card,'kniffel');        
       break;
     default:
       logger.error("figure not found!");
@@ -45,7 +48,7 @@ card.out("scriptum");
 function strike(card,name){
   const alternate= new Array();
   for (const fig of Object.getOwnPropertyNames(card.lower)) {
-    if(fig !== name && !card.lower[fig])
+    if(fig !== name && (card.lower[fig]==0))
       alternate.push(fig);
   }
   victim(card,alternate);

@@ -36,10 +36,13 @@ for (const [key, value] of Object.entries(second)) {
       //foursome
       figure = createFigure('foursome', 30, card.sumAll);
       figure.score(dice, key);
-      optionws.push(figure);
+      options.push(figure);
       break;
     case 5:
       //kniffel
+      figure = createFigure('kniffel', 50, card.fix50);
+      figure.score(dice, key);
+      options.push(figure);
       break;
     default:
       logger.error("figure not found!");

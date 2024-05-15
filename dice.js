@@ -2,48 +2,51 @@ import { logger } from "./logger.js";
 
 export const KNF = {
   "MAX_POINTS": 6,
-  "GENERATION": ["init", "first", "second", "third"],
+  "GENERATION": ["first", "second", "third"],
   "TUPPLE_THRESHOLD": 2
 };
 
 export function createDice() {
   let points = new Array(0, 0, 0, 0, 0);
-  let mask = new Array(1, 0, 0, 0, 1);
+  let mask = new Array(0, 0, 0, 0, 0);
   let generation = KNF.GENERATION[0];
   let valor = 0;
   let xtrTryCb;
   function out(msg) {
-    logger.debug({ dice: this }, msg);
+    logger.trace({ dice: this }, msg);
   }
 
   function roll() {
     let dnew = points.map(() => Math.floor(Math.random() * KNF.MAX_POINTS) + 1);
     this.points = dnew;
-    let i = KNF.GENERATION.indexOf(this.generation);
-    this.generation = KNF.GENERATION[++i];
-    logger.debug({ dice: this }, 'roll');
+    logger.trace({ dice: this }, 'roll');
   }
   function reroll() {
     let that=this;
     let dnew = points.map(() => Math.floor(Math.random() * KNF.MAX_POINTS) + 1);
     let dmerge1 = this.points.map((val, idx) =>that.mask[idx]*val);     
     let dmerge2 = dnew.map((val, idx) =>!that.mask[idx]*val);     
+    this.points=dmerge1.map((val, idx) =>dmerge2[idx]+val);
   }
   function advance() {
     let i = KNF.GENERATION.indexOf(this.generation);
-    this.generation = KNF.GENERATION[++i];
-    logger.debug({ dice: this }, 'advance');
-    if (this.generation == 'third') this.xtrTryCb();
-  }
+    if (this.generation == KNF.GENERATION[KNF.GENERATION.length])
+      this.xtrTryCb();
+    else
+     this.generation = KNF.GENERATION[++i];
+    logger.trace({ dice: this }, 'advance');
+    }
   function reset() {
     this.generation = KNF.GENERATION[0];
     this.points = new Array(0, 0, 0, 0, 0);
+    this.mask  = new Array(0, 0, 0, 0, 0);
     this.valor = 0;
+    this.xtrTryCb();
   }
   function register(callback) {
     this.xtrTryCb = callback;
   }
-  return { points, generation, mask, valor, roll, reroll, advance, register, out };
+  return { points, generation, mask, valor, reset, roll, reroll, advance, register, out };
 }
 
 export function createScorecard() {
@@ -56,9 +59,11 @@ export function createScorecard() {
       return accumulator + currentValue;
     }, 0);
   }
-
+  function fix50() {
+    return 50;
+  }
   function out(msg) {
-    logger.debug({ card: this }, msg);
+    logger.trace({ card: this }, msg);
   }
   function register(callback) {
     this.fullCardCb = callback;
@@ -78,7 +83,7 @@ export function createScorecard() {
   function strike(name) {
     this.lower[name] = -1;
   }
-  return { card, lower, sumAll, register, out, scribe, strike };
+  return { card, lower, sumAll, fix50, register, out, scribe, strike };
 }
 
 export function createFigure(given, max, total) {
@@ -95,7 +100,7 @@ export function createFigure(given, max, total) {
     for (const [i, v] of dice.points.entries()) {
       if (v == mask) this.flag[i] = 1;
     }
-    logger.debug(this, 'score');
+    logger.trace(this, 'score');
   }
   function selected(dice){
     dice.mask = this.flag;                                                                                        

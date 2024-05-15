@@ -1,7 +1,7 @@
 import { logger } from "./logger.js";
 import { score } from "./sutils.js";
 import { chose, note } from "./cutils.js";
-import { createDice } from "./dice.js";
+import { KNF, createDice } from "./dice.js";
 
 export function moveFactory(type, gstate) {
   let move;
@@ -75,10 +75,9 @@ export class Dice extends Move {
 
   execute() {
     super.log();
-    if (this.dice.generation=="init"){
+    if (this.dice.generation==KNF.GENERATION[0]){
       this.dice.roll();
 //    logger.trace({points: `${this.gstate.dice}`, generation: `${this.gstate.dice.generation}`});
-      this.dice.advance();  
      } else{
       this.dice.reroll(); 
     }
@@ -122,7 +121,9 @@ export class Chose extends Move {
   execute() {
     super.log();
     this.gstate.choice=chose(this.dice, this.card, this.options);
-    return; 
+    this.options[this.gstate.choice].selected(this.dice);
+    this.dice.advance();
+      return; 
   }
 
 }
@@ -142,6 +143,8 @@ export class Note extends Move {
   execute() {
     super.log();
     note(this.dice, this.card, this.options[this.choice]);
+    this.gstate.dice.reset();
+    this.gstate.options =[];
     return;
   }
 
@@ -172,6 +175,7 @@ export class End extends Move {
   execute() {
     super.log();
     logger.debug(this.message);
+    logger.debug(this.gstate.card);
     return this.next;
   }
 }
